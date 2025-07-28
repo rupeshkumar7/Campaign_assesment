@@ -24,16 +24,23 @@
 
 # How to Run the Project Locally
 1. Clone the repository:
-  git clone https://github.com/your-username/your-repo-name.git
-  cd your-repo-name
+  git clone https://github.com/rupeshkumar7/Campaign_assesment.git
+  
+  cd Campaign_assesment
 
 2. Install dependencies:
-  npm install
-  Start the development server:
 
-3. Start server
+  npm install
+  
+  npm install ag-grid-react ag-grid-community
+  
+  npm install dayjs clsx
+
+3. Start the development server:
+
   npm start
-  Open http://localhost:3000 in your browser.
+
+4. Open http://localhost:3000 in your browser.
 
 # AI Assistant Disclosure:- 
 This project used AI assistance for:
