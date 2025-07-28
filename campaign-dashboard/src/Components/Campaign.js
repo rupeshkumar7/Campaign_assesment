@@ -1,17 +1,19 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { AgGridReact } from 'ag-grid-react';
 import mockData from '../data/mockCampaigns';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
+import { FaSearch } from 'react-icons/fa';
+import '.././App.css'; 
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 const Campaign = () => {
-  const gridRef = useRef();
+  const [gridApi, setGridApi] = useState(null);
   const [rowData, setRowData] = useState(mockData);
+  const [theme, setTheme] = useState('light');
   const [bulkStatus, setBulkStatus] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
   const columnDefs = useMemo(() => [
   {
@@ -86,44 +88,85 @@ const Campaign = () => {
     suppressMenu: false,
   };
 
-  const handleBulkUpdate = useCallback(() => {
-    const api = gridRef.current?.api;
-    if (!api || !bulkStatus) return;
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
 
-    const selectedRows = api.getSelectedRows();
+  const handleSearch = () => {
+    if (gridApi) {
+      gridApi.setGridOption('quickFilterText', searchInput.trim());
+    }
+  };
+
+  const onGridReady=(params)=>{
+    setGridApi(params.api);
+  }
+
+  const handleBulkUpdate = useCallback(() => {
+    if (!gridApi || !bulkStatus) return;
+
+    const selectedRows = gridApi.getSelectedRows();
     if (selectedRows.length === 0) {
       alert('No rows selected.');
       return;
     }
-
     const updatedRows = selectedRows.map(row => ({
       ...row,
       Status: bulkStatus,
     }));
-
-    // Update rowData state (for reactivity)
     const updatedData = rowData.map(row => {
       const updated = updatedRows.find(u => u.CampaignId === row.CampaignId);
       return updated ? updated : row;
     });
 
     setRowData(updatedData);
-
-    // Optional: instantly apply changes to the grid
-    api.setRowData(updatedData);
-
-    // Clear selection
-    api.deselectAll();
-
-    // Clear bulk status
+    gridApi.setGridOption('rowData', updatedData);
+    gridApi.deselectAll();
     setBulkStatus('');
   }, [bulkStatus, rowData]);
 
 
-
   return (
-
-    <div>
+    <div className={theme} style={{ padding: '1rem' }}>
+       <div className="top-bar">
+        <button onClick={toggleTheme}>
+          Toggle {theme === 'light' ? '🌙 Dark' : '☀️ Light'} Mode
+        </button>
+      </div>
+      <div
+        className={`ag-theme-alpine ${theme === 'dark' ? 'dark-mode' : ''}`}
+        style={{ height: 500, width: '100%' }}
+      >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
+          <input
+            type="text"
+            placeholder="Search campaigns..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            style={{
+              padding: '8px 12px',
+              width: '300px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+            }}
+          />
+          <button
+            onClick={handleSearch}
+            style={{
+              backgroundColor: '#1976d2',
+              color: 'white',
+              padding: '8px 12px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <FaSearch /> Search
+          </button>
+      </div>
         <div style={{ marginBottom: 10 }}>
             <label style={{ marginRight: 10 }}>Bulk Update Status:</label>
             <select value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value)}>
@@ -143,8 +186,9 @@ const Campaign = () => {
             </button>
         </div>
 
-        <div className="ag-theme-alpine" style={{ height: '85vh', width: '100%' }}>
+        <div style={{ height: '85vh', width: '100%' }}>
         <AgGridReact
+            onGridReady={onGridReady}
             rowData={rowData}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
@@ -170,8 +214,9 @@ const Campaign = () => {
             },
             ],
             defaultToolPanel: 'columns',
-        }}
+            }}
         />
+        </div>
         </div>
     </div>
   );

@@ -3,7 +3,7 @@ import Campaign from './Components/Campaign';
 
 function App() {
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="app-header">
       <h2>Campaign Listing</h2>
       <Campaign />
     </div>
