@@ -22,6 +22,10 @@
 
 📄 Pagination with 100+ Mock Campaigns
 
+🌐 Live Demo
+
+🔗 Live Demo: https://campaign-assesment-mu.vercel.app/
+
 # How to Run the Project Locally
 1. Clone the repository:
    git clone https://github.com/rupeshkumar7/Campaign_assesment.git
